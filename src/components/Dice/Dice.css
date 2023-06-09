@@ -1,0 +1,14 @@
+.dice {
+  width: 70%;
+  height: 70%;
+  background-size: cover;
+  z-index: 1;
+}
+
+.dice:hover {
+  cursor: grab;
+}
+
+.dice:active {
+  cursor: grabbing;
+}
