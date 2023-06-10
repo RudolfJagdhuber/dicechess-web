@@ -4,10 +4,17 @@ type Direction = "top" | "right" | "bottom" | "left";
 
 const DIR_VALUE = { top: -8, right: 1, bottom: 8, left: -1 };
 
-interface Move {
+// A move made by a specific dice
+interface DiceMove {
   direction: Direction | undefined;
   endNumber: number;
   position: number;
+}
+
+// The full move information (including the dice that makes the move)
+interface Move {
+  dice: DiceProps;
+  move: DiceMove;
 }
 
 const recursiveMoveList = (
@@ -16,7 +23,7 @@ const recursiveMoveList = (
   stepsLeft: number,
   startDir: Direction | undefined,
   board: Array<DiceProps | undefined>,
-  moveList: Move[]
+  moveList: DiceMove[]
 ) => {
   // Return if the dice moved off the board.
   if (dice.position < 0 || dice.position > 63) return moveList;
@@ -45,7 +52,7 @@ const recursiveMoveList = (
   for (let dir of dirs) {
     // If its the first move, set the starting direction
     const nextStartDir = startDir ?? dir;
-    // Move the dice one square in the direction of dir
+    // DiceMove the dice one square in the direction of dir
     nextDice = {
       number: dice.number, // TODO
       isWhite: dice.isWhite,
@@ -88,5 +95,32 @@ const possibleMoves = (
   );
 };
 
-export { possibleMoves };
-export type { Move };
+const engineCalculation = (board: (DiceProps | undefined)[]): Move[] => {
+  const bestMoves: Move[] = [];
+
+  const allMoves = allMovesList(board);
+
+  bestMoves.push(allMoves[0]);
+
+  return bestMoves;
+};
+
+const allMovesList = (
+  board: (DiceProps | undefined)[],
+  isWhite: boolean = false
+): Move[] => {
+  const allMoves: Move[] = board
+    .filter((d) => d && d.isWhite === isWhite)
+    .flatMap((d) => {
+      if (!d) return [];
+      return possibleMoves(d, board).map((dicemove) => {
+        const move: Move = { dice: d, move: dicemove };
+        return move;
+      });
+    });
+
+  return allMoves;
+};
+
+export { possibleMoves, engineCalculation };
+export type { DiceMove, Move };

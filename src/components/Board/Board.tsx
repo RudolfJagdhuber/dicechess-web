@@ -2,7 +2,13 @@ import { useState } from "react";
 import "./Board.css";
 import Square from "../Square/Square";
 import { DiceProps } from "../Dice/Dice";
-import { possibleMoves, Move } from "../Dice/helpers";
+import {
+  possibleMoves,
+  DiceMove,
+  Move,
+  engineCalculation,
+} from "../Dice/helpers";
+import Player from "../Player/Player";
 
 const makeDice = (
   number: number,
@@ -36,27 +42,33 @@ boardX[62] = makeDice(3, 62, true);
 boardX[63] = makeDice(2, 63, true);
 
 let isWhitesMove = true;
-let possibleMoveList: Move[] = [];
+let possibleMoveList: DiceMove[] = [];
 
 const Board = () => {
   const [board, setBoard] = useState<Array<DiceProps | undefined>>(boardX);
   const [highlightedSquares, setHighlightedSquares] = useState<number[]>([]);
 
-  const moveDice = (dice: DiceProps, to: number): boolean => {
-    // Check if move is possible
-    if (!possibleMoveList.map((m) => m.position).includes(to)) return false;
-    // Check if its the players turn
-    if (isWhitesMove !== dice.isWhite) return false;
-    // Make the move
+  const updateBoard = (move: Move) => {
     setBoard((d) => {
-      const from = dice.position;
-      dice.position = to;
+      const oldPosition = move.dice.position;
+      move.dice.position = move.move.position;
+      move.dice.number = move.move.endNumber;
       return d.map((dx, i) => {
-        if (i === from) return undefined;
-        if (i === to) return dice;
+        if (i === oldPosition) return undefined;
+        if (i === move.move.position) return move.dice;
         return dx;
       });
     });
+  };
+
+  const moveDice = (dice: DiceProps, to: number): boolean => {
+    // Find from the list of possible moves
+    let move = possibleMoveList.filter((m) => m.position === to)[0];
+    if (!move) return false;
+    // Check if its the players turn
+    if (isWhitesMove !== dice.isWhite) return false;
+    // Make the move
+    updateBoard({ dice: dice, move: move });
     possibleMoveList = [];
     isWhitesMove = !isWhitesMove;
     return true;
@@ -74,20 +86,41 @@ const Board = () => {
     console.log(possibleMoveList);
   };
 
-  console.log("Rendered");
+  const engine = async () => {
+    // Compute the best move
+    const bestMoves = await new Promise<Move[]>((resolve) => {
+      setTimeout(() => {
+        resolve(engineCalculation(board));
+      }, 1000);
+    });
+
+    // Perform the move // TODO: animate move
+    updateBoard(bestMoves[0]);
+    isWhitesMove = !isWhitesMove;
+  };
+
+  console.log("Rendered. WhiteToMove = " + isWhitesMove);
+  if (!isWhitesMove) {
+    engine();
+  }
+
   return (
-    <div id="board">
-      {board.map((square, i) => (
-        <Square
-          key={i}
-          index={i}
-          isWhite={i % 2 === ~~(i / 8) % 2}
-          dice={square}
-          highlight={highlightedSquares.includes(i)}
-          moveFn={moveDice}
-          highlightFn={highlightMoves}
-        />
-      ))}
+    <div id="board-layout">
+      <Player isPlayer={false} isToMove={!isWhitesMove} />
+      <div id="board">
+        {board.map((square, i) => (
+          <Square
+            key={i}
+            index={i}
+            isWhite={i % 2 === ~~(i / 8) % 2}
+            dice={square}
+            highlight={highlightedSquares.includes(i)}
+            moveFn={moveDice}
+            highlightFn={highlightMoves}
+          />
+        ))}
+      </div>
+      <Player isPlayer={true} isToMove={isWhitesMove} />
     </div>
   );
 };

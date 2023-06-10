@@ -1,0 +1,62 @@
+.player-layout {
+  display: flex;
+  /* flex-direction: row; */
+  height: 40px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.avatar {
+  height: 40px;
+  width: 40px;
+  background-size: cover;
+}
+
+.name {
+  flex-grow: 1;
+  margin-left: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #eee;
+  text-overflow: ellipsis;
+}
+
+.clock {
+  display: flex;
+  height: 40px;
+  width: 200px;
+  gap: 8px;
+  border-radius: 8px;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.active {
+  background-color: #eee;
+  color: #121212
+}
+
+.inactive {
+  background-color: #333;
+  color: #777
+}
+
+
+@keyframes spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #bbb; /* Light grey */
+  border-top: 2px solid #121212;
+  border-radius: 50%;
+  animation: spinner 1s linear infinite;
+}
