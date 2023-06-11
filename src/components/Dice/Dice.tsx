@@ -1,3 +1,4 @@
+import { RefObject } from "react";
 import "./Dice.css";
 
 export interface DiceProps {
@@ -17,15 +18,19 @@ const Dice = ({
   dice,
   moveFn,
   highlightFn,
+  diceRef,
 }: {
   dice: DiceProps;
   moveFn: (dice: DiceProps, to: number) => boolean;
   highlightFn: (dice: DiceProps | undefined) => void;
+  diceRef: RefObject<HTMLDivElement>;
 }) => {
   let activeElement: HTMLElement | undefined;
   let rect: DOMRect;
 
   const grabDice = (event: React.MouseEvent) => {
+    // Dont grab opponents dice
+    if (!dice.isWhite) return;
     document.addEventListener("mouseup", placeDice);
     document.addEventListener("mousemove", moveDice);
     highlightFn(dice);
@@ -33,7 +38,8 @@ const Dice = ({
     rect = activeElement.getBoundingClientRect();
     const x = event.clientX - rect.left - rect.width / 2;
     const y = event.clientY - rect.top - rect.height / 2;
-    activeElement.style.translate = `${x}px ${y}px`;
+    activeElement.style.transition = "none";
+    activeElement.style.transform = `translate(${x}px, ${y}px)`;
     activeElement.style.zIndex = "2";
   };
 
@@ -41,7 +47,7 @@ const Dice = ({
     if (activeElement) {
       const x = event.clientX - rect.left - rect.width / 2;
       const y = event.clientY - rect.top - rect.height / 2;
-      activeElement.style.translate = `${x}px ${y}px`;
+      activeElement.style.transform = `translate(${x}px, ${y}px)`;
     }
   };
 
@@ -75,7 +81,8 @@ const Dice = ({
         return;
       }
     }
-    activeElement.style.translate = "0px 0px";
+    activeElement.style.transition = "transform 0.2s";
+    activeElement.style.transform = "translate(0px, 0px)";
     activeElement.style.zIndex = "1";
     activeElement = undefined;
   };
@@ -87,6 +94,7 @@ const Dice = ({
     ".svg";
   return (
     <div
+      ref={diceRef}
       style={{ backgroundImage: `url(${asset})` }}
       className="dice"
       onMouseDown={grabDice}

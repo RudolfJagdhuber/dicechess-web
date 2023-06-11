@@ -1,3 +1,4 @@
+import { RefObject } from "react";
 import Dice, { DiceProps } from "../Dice/Dice";
 import "./Square.css";
 
@@ -8,6 +9,7 @@ const Square = ({
   highlight,
   moveFn,
   highlightFn,
+  diceRef,
 }: {
   index: number;
   isWhite: boolean;
@@ -15,6 +17,7 @@ const Square = ({
   highlight: boolean;
   moveFn: (dice: DiceProps, to: number) => boolean;
   highlightFn: (dice: DiceProps | undefined) => void;
+  diceRef: RefObject<HTMLDivElement>;
 }) => {
   return (
     <div
@@ -23,7 +26,14 @@ const Square = ({
         // (dragOver ? "highlight" : "")
       }
     >
-      {dice && <Dice dice={dice} moveFn={moveFn} highlightFn={highlightFn} />}
+      {dice && (
+        <Dice
+          dice={dice}
+          moveFn={moveFn}
+          highlightFn={highlightFn}
+          diceRef={diceRef}
+        />
+      )}
       {highlight && <div className="highlight" />}
     </div>
   );

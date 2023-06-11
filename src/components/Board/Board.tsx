@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { createRef, RefObject, useEffect, useRef, useState } from "react";
 import "./Board.css";
 import Square from "../Square/Square";
 import { DiceProps } from "../Dice/Dice";
@@ -47,6 +47,14 @@ let possibleMoveList: DiceMove[] = [];
 const Board = () => {
   const [board, setBoard] = useState<Array<DiceProps | undefined>>(boardX);
   const [highlightedSquares, setHighlightedSquares] = useState<number[]>([]);
+  const diceRefs = useRef<RefObject<HTMLDivElement>[]>([]);
+
+  useEffect(() => {
+    // initialize the array of refs
+    diceRefs.current = Array(64)
+      .fill(null)
+      .map(() => createRef<HTMLDivElement>());
+  }, []);
 
   const updateBoard = (move: Move) => {
     setBoard((d) => {
@@ -77,7 +85,8 @@ const Board = () => {
   // Highlight moves of a dice, or reset highlighting if undefined.
   const highlightMoves = (dice: DiceProps | undefined) => {
     if (!dice) {
-      setHighlightedSquares([]);
+      // Avoid rerender while opponent thinks
+      if (isWhitesMove) setHighlightedSquares([]);
       return;
     }
     if (isWhitesMove !== dice.isWhite) return;
@@ -91,12 +100,36 @@ const Board = () => {
     const bestMoves = await new Promise<Move[]>((resolve) => {
       setTimeout(() => {
         resolve(engineCalculation(board));
-      }, 1000);
+      }, 500);
     });
+    const move = bestMoves[0];
 
-    // Perform the move // TODO: animate move
-    updateBoard(bestMoves[0]);
-    isWhitesMove = !isWhitesMove;
+    // Animate the Move
+    const diceDiv = diceRefs.current[move.dice.position].current;
+    if (!diceDiv) return;
+    const handleMoveAnimationEnd = () => {
+      diceDiv.removeEventListener("transitionend", handleMoveAnimationEnd);
+      // Perform the move
+      updateBoard(move);
+      isWhitesMove = !isWhitesMove;
+      console.log("Transition completed");
+    };
+    const translateString = translatePxFromMove(
+      move,
+      diceDiv.getBoundingClientRect().height / 0.7
+    );
+    diceDiv.addEventListener("transitionend", handleMoveAnimationEnd);
+    diceDiv.style.transition = "transform 0.3s";
+    diceDiv.style.zIndex = "2";
+    diceDiv.style.transform = `translate(${translateString})`;
+  };
+
+  const translatePxFromMove = (move: Move, size: number): string => {
+    const from = move.dice.position;
+    const to = move.move.position;
+    const yPx = (~~(to / 8) - ~~(from / 8)) * size;
+    const xPx = ((to % 8) - (from % 8)) * size;
+    return `${xPx}px, ${yPx}px`;
   };
 
   console.log("Rendered. WhiteToMove = " + isWhitesMove);
@@ -117,6 +150,7 @@ const Board = () => {
             highlight={highlightedSquares.includes(i)}
             moveFn={moveDice}
             highlightFn={highlightMoves}
+            diceRef={diceRefs.current[i]}
           />
         ))}
       </div>
