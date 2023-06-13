@@ -34,9 +34,22 @@
     z-index: 2;
 }
 
+.preview-inner-container {
+    display: flex;
+    flex: 1;
+    padding: 2%;
+    height: 96%;
+    justify-content: center;
+    align-items: center;
+}
+
+.preview-inner-container:hover {
+    background-color: #ffff00bb;
+}
+
 .dice-preview {
-    width: 45%;
     height: 45%;
+    aspect-ratio: 1;
     background-size: cover;
 }
 

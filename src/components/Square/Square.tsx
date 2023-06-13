@@ -8,7 +8,6 @@ const Square = ({
   isWhite,
   dice,
   movePreview,
-  isWhitePreview,
   moveFn,
   highlightFn,
   diceRef,
@@ -17,7 +16,6 @@ const Square = ({
   isWhite: boolean;
   dice?: DiceProps;
   movePreview: number[];
-  isWhitePreview: boolean;
   moveFn: (dice: DiceProps, to: number) => boolean;
   highlightFn: (dice: DiceProps | undefined) => void;
   diceRef: RefObject<HTMLDivElement>;
@@ -40,7 +38,7 @@ const Square = ({
       {movePreview.length > 0 && (
         <MovePreview
           movePreview={movePreview}
-          isWhitePreview={isWhitePreview}
+          isWhitePreview={movePreview[0] % 1 === 0}
         />
       )}
     </div>
@@ -54,26 +52,32 @@ const MovePreview = ({
   movePreview: number[];
   isWhitePreview: boolean;
 }) => {
-  const diceAssets = movePreview.map(
-    (num) =>
+  const diceAssets = movePreview.map((num) => {
+    const rounded = Math.round(num);
+    return (
       "assets/images/dice/d" +
       (isWhitePreview ? "w" : "b") +
-      (num === 0 ? "k" : num === -1 ? 0 : num) +
+      (rounded === 0 ? "k" : rounded === -1 ? 0 : rounded) +
       ".svg"
-  );
+    );
+  });
 
   return (
     <div className="preview-container">
-      <div
-        style={{ backgroundImage: `url(${diceAssets[0]})` }}
-        className="dice-preview"
-      />
-      {diceAssets.length === 2 && <div className="sep" />}
-      {diceAssets.length === 2 && (
+      <div className="preview-inner-container">
         <div
-          style={{ backgroundImage: `url(${diceAssets[1]})` }}
+          style={{ backgroundImage: `url(${diceAssets[0]})` }}
           className="dice-preview"
         />
+      </div>
+      {diceAssets.length === 2 && <div className="sep" />}
+      {diceAssets.length === 2 && (
+        <div className="preview-inner-container">
+          <div
+            style={{ backgroundImage: `url(${diceAssets[1]})` }}
+            className="dice-preview"
+          />
+        </div>
       )}
     </div>
   );

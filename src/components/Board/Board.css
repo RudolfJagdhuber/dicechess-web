@@ -2,7 +2,8 @@
     display: grid;
     grid-template-columns: repeat(8, 12.5%);
     grid-template-rows: repeat(8, 12.5%);
-    width: 800px;
-    aspect-ratio: 1;
-    background-color: brown;
+    width: calc(90vw);
+    height: calc(90vw);
+    max-width: calc(90vh - 104px);
+    max-height: calc(90vh - 104px);
 }

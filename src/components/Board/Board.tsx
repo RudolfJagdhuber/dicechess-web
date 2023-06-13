@@ -89,19 +89,22 @@ const Board = () => {
   };
 
   // set preview squares to display from moves of a dice. reset if undefined.
+  // To indicate the dice is black we add 0.1 to the preview.
   const highlightMoves = (dice: DiceProps | undefined) => {
     if (!dice) {
       // Avoid rerender while opponent thinks
-      if (isWhitesMove) setPreviewSquares(Array(64).fill([]));
+      setPreviewSquares(Array(64).fill([]));
       return;
     }
-    if (isWhitesMove !== dice.isWhite) return;
     possibleMoveList = possibleMoves(dice, board);
     const prevSquares = Array(64).fill([]);
     possibleMoveList.forEach(
       (m) =>
         (prevSquares[m.position] = [
-          ...new Set([...prevSquares[m.position], m.endNumber]),
+          ...new Set([
+            ...prevSquares[m.position],
+            m.endNumber + (dice.isWhite ? 0 : 0.1),
+          ]),
         ])
     );
     setPreviewSquares(prevSquares);
@@ -163,7 +166,6 @@ const Board = () => {
             isWhite={i % 2 === ~~(i / 8) % 2}
             dice={square}
             movePreview={previewSquares[i]}
-            isWhitePreview={true}
             moveFn={moveDice}
             highlightFn={highlightMoves}
             diceRef={diceRefs.current[i]}

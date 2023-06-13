@@ -17,8 +17,6 @@ const Dice = ({
   let rect: DOMRect;
 
   const grabDice = (event: React.MouseEvent) => {
-    // Dont grab opponents dice
-    if (!dice.isWhite) return;
     document.addEventListener("mouseup", placeDice);
     document.addEventListener("mousemove", moveDice);
     highlightFn(dice);
@@ -27,6 +25,7 @@ const Dice = ({
     const x = event.clientX - rect.left - rect.width / 2;
     const y = event.clientY - rect.top - rect.height / 2;
     activeElement.style.transition = "none";
+    activeElement.style.pointerEvents = "none";
     activeElement.style.transform = `translate(${x}px, ${y}px)`;
     activeElement.style.zIndex = "3";
   };
@@ -58,7 +57,9 @@ const Dice = ({
     const newCol = (dice.position % 8) + dx;
     // New position and actual column need to be on the board.
     // => newPos in [0, 63], newCol in [0, 7]
+    // Also dont move opponents Dice
     if (
+      dice.isWhite &&
       newPos >= 0 &&
       newPos < 64 &&
       newCol >= 0 &&
@@ -73,6 +74,7 @@ const Dice = ({
         return;
       }
     }
+    activeElement.style.pointerEvents = "auto";
     activeElement.style.transition = "transform 0.2s";
     activeElement.style.transform = "translate(0px, 0px)";
     activeElement.style.zIndex = "1";
