@@ -11,19 +11,19 @@ interface WorkerData {
   maxDepth?: number;
 }
 interface WorkerResult {
-  result: Move[];
+  result: Move | undefined;
 }
 
 const worker = (data: WorkerData | undefined): WorkerResult => {
-  if (!data) return { result: [] };
-  const bestMoves = engineCalculation(
+  if (!data) return { result: undefined };
+  const bestMove = engineCalculation(
     data.board,
     data.isWhitesMove,
     data.currentDepth,
     data.maxDepth
   );
   console.log("Proposed a move!");
-  return { result: bestMoves };
+  return { result: bestMove as Move };
 };
 
 const engineCalculation = (
@@ -31,9 +31,9 @@ const engineCalculation = (
   isWhitesMove: boolean,
   currentDepth: number = 0,
   maxDepth: number = 2
-): Move[] => {
+): Move | number => {
   // Collect all possible moves in the given postion
-  const allMoves = allMovesList(board);
+  const allMoves = allMovesList(board, isWhitesMove);
 
   // For every resulting position: Either compute an evaluation if at maxDepth,
   // or recurse this function with the new position at currentDepth + 1.
@@ -53,25 +53,31 @@ const engineCalculation = (
     }
     // We are not at maxDepth, so we go deeper before we make an evaluation.
     else {
-      const deeperBestMoves = engineCalculation(
+      const deeperBestRating = engineCalculation(
         newBoard,
         !isWhitesMove,
         currentDepth + 1,
         maxDepth
       );
       // The rating will be the one from the best move of the deeper Ranking.
-      move.rating = deeperBestMoves[0].rating;
+      move.rating = deeperBestRating as number;
     }
   });
-  // Sort the moves by rating.
-  allMoves.sort((a, b) => (a.rating && b.rating ? b.rating - a.rating : 0));
   // Whenever we move up a depth level, the viewpoint changes between black and
-  // white. Therefore the scores need to be reversed before every return (* -1).
-  allMoves.forEach((m) => {
-    if (m.rating) m.rating = -1 * m.rating;
-  });
+  // white. Therefore the score needs to be reversed before every return (* -1).
+  // Shortcut if current depth > 0, then only return rating
+  if (currentDepth > 0)
+    return allMoves
+      .map((m) => (m.rating ? -m.rating : 0))
+      .sort((a, b) => a - b)[0];
 
-  return allMoves;
+  // Find the single best move.
+  const bestMove = allMoves.reduce(function (prev, current) {
+    if (!prev.rating || !current.rating) return current;
+    return prev.rating > current.rating ? prev : current;
+  });
+  if (bestMove.rating) bestMove.rating = bestMove.rating * -1;
+  return bestMove;
 };
 
 const allMovesList = (
@@ -137,7 +143,8 @@ const evaluatePosition = (board: (DiceProps | undefined)[]): number => {
     blackMoves.filter((m) => m.move.position === whiteKingPos).length > 0;
   const blackInCheck =
     whiteMoves.filter((m) => m.move.position === blackKingPos).length > 0;
-  evaluation += blackInCheck ? 0.4 : whiteInCheck ? -0.4 : 0;
+  evaluation += blackInCheck ? 0.4 : 0;
+  evaluation += whiteInCheck ? -0.4 : 0;
 
   // If a dice guards a possibleMove of the king, this gives a bonus of +/- 0.3.
   const blackKingMoves = blackMoves.filter((m) => m.dice.number === 0);
@@ -154,6 +161,10 @@ const evaluatePosition = (board: (DiceProps | undefined)[]): number => {
     )
       evaluation -= 0.3;
   });
+
+  // Maybe alternatively add bonus if a king has a non attacked field to go
+  // This avoids being better if only one field to go which is not attacked vs
+  // 4 fields to go where one is attacked.
 
   return evaluation;
 };

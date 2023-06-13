@@ -14,7 +14,7 @@ import { possibleMoves, DiceMove, Move } from "../Dice/helpers";
 import Player from "../Player/Player";
 
 interface WorkerResult {
-  result: Move[];
+  result: Move | undefined;
 }
 
 const createWorker = () => new Worker(new URL("../../engine", import.meta.url));
@@ -151,8 +151,8 @@ const Board = () => {
   );
   const { result } = useWorker(createWorker, engineData);
   if (result) {
-    const bestMoves = (result as WorkerResult).result;
-    if (bestMoves.length > 0) animateEngineMove(bestMoves[0]);
+    const bestMove = (result as WorkerResult).result;
+    if (bestMove) animateEngineMove(bestMove);
   }
 
   return (
