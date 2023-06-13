@@ -22,3 +22,26 @@
     height: 30%;
     background-color: #00000024;
 }
+
+.preview-container {
+    position: absolute;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    opacity: 85%;
+    height: 100%;
+    width: 100%;
+    z-index: 2;
+}
+
+.dice-preview {
+    width: 45%;
+    height: 45%;
+    background-size: cover;
+}
+
+.sep {
+    height: 100%;
+    border-left: 2px dashed #444;
+}
+

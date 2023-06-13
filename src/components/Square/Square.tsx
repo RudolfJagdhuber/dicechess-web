@@ -1,12 +1,14 @@
 import { RefObject } from "react";
-import Dice, { DiceProps } from "../Dice/Dice";
+import Dice from "../Dice/Dice";
+import { DiceProps } from "../Dice/helpers";
 import "./Square.css";
 
 const Square = ({
   index,
   isWhite,
   dice,
-  highlight,
+  movePreview,
+  isWhitePreview,
   moveFn,
   highlightFn,
   diceRef,
@@ -14,7 +16,8 @@ const Square = ({
   index: number;
   isWhite: boolean;
   dice?: DiceProps;
-  highlight: boolean;
+  movePreview: number[];
+  isWhitePreview: boolean;
   moveFn: (dice: DiceProps, to: number) => boolean;
   highlightFn: (dice: DiceProps | undefined) => void;
   diceRef: RefObject<HTMLDivElement>;
@@ -34,7 +37,44 @@ const Square = ({
           diceRef={diceRef}
         />
       )}
-      {highlight && <div className="highlight" />}
+      {movePreview.length > 0 && (
+        <MovePreview
+          movePreview={movePreview}
+          isWhitePreview={isWhitePreview}
+        />
+      )}
+    </div>
+  );
+};
+
+const MovePreview = ({
+  movePreview,
+  isWhitePreview,
+}: {
+  movePreview: number[];
+  isWhitePreview: boolean;
+}) => {
+  const diceAssets = movePreview.map(
+    (num) =>
+      "assets/images/dice/d" +
+      (isWhitePreview ? "w" : "b") +
+      (num === 0 ? "k" : num === -1 ? 0 : num) +
+      ".svg"
+  );
+
+  return (
+    <div className="preview-container">
+      <div
+        style={{ backgroundImage: `url(${diceAssets[0]})` }}
+        className="dice-preview"
+      />
+      {diceAssets.length === 2 && <div className="sep" />}
+      {diceAssets.length === 2 && (
+        <div
+          style={{ backgroundImage: `url(${diceAssets[1]})` }}
+          className="dice-preview"
+        />
+      )}
     </div>
   );
 };

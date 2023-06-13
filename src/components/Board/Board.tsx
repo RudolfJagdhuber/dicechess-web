@@ -1,52 +1,50 @@
-import { createRef, RefObject, useEffect, useRef, useState } from "react";
+import {
+  createRef,
+  RefObject,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useWorker } from "react-hooks-worker";
 import "./Board.css";
 import Square from "../Square/Square";
-import { DiceProps } from "../Dice/Dice";
-import {
-  possibleMoves,
-  DiceMove,
-  Move,
-  engineCalculation,
-} from "../Dice/helpers";
+import { DiceProps, makeDice } from "../Dice/helpers";
+import { possibleMoves, DiceMove, Move } from "../Dice/helpers";
 import Player from "../Player/Player";
 
-const makeDice = (
-  number: number,
-  pos: number,
-  isWhite: boolean = false
-): DiceProps => {
-  return {
-    number: number,
-    isWhite: isWhite,
-    // orientation: { top: 1, right: 2, bottom: 3, left: 4, opposing: 5 },
-    position: pos,
-  };
-};
+interface WorkerResult {
+  result: Move[];
+}
+
+const createWorker = () => new Worker(new URL("../../engine", import.meta.url));
 
 const boardX = Array<DiceProps | undefined>(64).fill(undefined);
-boardX[0] = makeDice(2, 0);
-boardX[1] = makeDice(3, 1);
-boardX[2] = makeDice(2, 2);
-boardX[3] = makeDice(1, 3);
-boardX[4] = makeDice(0, 4);
-boardX[5] = makeDice(1, 5);
-boardX[6] = makeDice(3, 6);
-boardX[7] = makeDice(2, 7);
-boardX[56] = makeDice(2, 56, true);
-boardX[57] = makeDice(3, 57, true);
-boardX[58] = makeDice(2, 58, true);
-boardX[59] = makeDice(1, 59, true);
-boardX[60] = makeDice(0, 60, true);
-boardX[61] = makeDice(1, 61, true);
-boardX[62] = makeDice(3, 62, true);
-boardX[63] = makeDice(2, 63, true);
+boardX[0] = makeDice(2, 1, 0, false);
+boardX[1] = makeDice(3, 1, 1, false);
+boardX[2] = makeDice(2, 1, 2, false);
+boardX[3] = makeDice(1, 4, 3, false);
+boardX[4] = makeDice(0, 0, 4, false);
+boardX[5] = makeDice(1, 4, 5, false);
+boardX[6] = makeDice(3, 1, 6, false);
+boardX[7] = makeDice(2, 1, 7, false);
+boardX[56] = makeDice(2, 1, 56, true);
+boardX[57] = makeDice(3, 1, 57, true);
+boardX[58] = makeDice(2, 1, 58, true);
+boardX[59] = makeDice(1, 4, 59, true);
+boardX[60] = makeDice(0, 0, 60, true);
+boardX[61] = makeDice(1, 4, 61, true);
+boardX[62] = makeDice(3, 1, 62, true);
+boardX[63] = makeDice(2, 1, 63, true);
 
 let isWhitesMove = true;
 let possibleMoveList: DiceMove[] = [];
 
 const Board = () => {
   const [board, setBoard] = useState<Array<DiceProps | undefined>>(boardX);
-  const [highlightedSquares, setHighlightedSquares] = useState<number[]>([]);
+  const [previewSquares, setPreviewSquares] = useState<number[][]>(
+    Array(64).fill([])
+  );
   const diceRefs = useRef<RefObject<HTMLDivElement>[]>([]);
 
   useEffect(() => {
@@ -58,20 +56,28 @@ const Board = () => {
 
   const updateBoard = (move: Move) => {
     setBoard((d) => {
-      const oldPosition = move.dice.position;
-      move.dice.position = move.move.position;
-      move.dice.number = move.move.endNumber;
+      const newDice: DiceProps = {
+        number: move.move.endNumber,
+        orientation: move.move.endOrientation,
+        isWhite: move.dice.isWhite,
+        position: move.move.position,
+      };
       return d.map((dx, i) => {
-        if (i === oldPosition) return undefined;
-        if (i === move.move.position) return move.dice;
+        if (i === move.dice.position) return undefined;
+        if (i === move.move.position) return newDice;
         return dx;
       });
     });
   };
 
+  // The caller does not have the explicit move, but only the position that the
+  // dice was dropped at. If two moves are possible at a field, it is split in
+  // two halves. We indicate that it was dropped on the second half by making
+  // the 'to' variable negative. Ie to = -7 => Second possible move to field 7.
   const moveDice = (dice: DiceProps, to: number): boolean => {
     // Find from the list of possible moves
-    let move = possibleMoveList.filter((m) => m.position === to)[0];
+    const movesTo = possibleMoveList.filter((m) => m.position === Math.abs(to));
+    const move = movesTo[movesTo.length === 1 || to > 0 ? 0 : 1];
     if (!move) return false;
     // Check if its the players turn
     if (isWhitesMove !== dice.isWhite) return false;
@@ -82,29 +88,26 @@ const Board = () => {
     return true;
   };
 
-  // Highlight moves of a dice, or reset highlighting if undefined.
+  // set preview squares to display from moves of a dice. reset if undefined.
   const highlightMoves = (dice: DiceProps | undefined) => {
     if (!dice) {
       // Avoid rerender while opponent thinks
-      if (isWhitesMove) setHighlightedSquares([]);
+      if (isWhitesMove) setPreviewSquares(Array(64).fill([]));
       return;
     }
     if (isWhitesMove !== dice.isWhite) return;
     possibleMoveList = possibleMoves(dice, board);
-    setHighlightedSquares(possibleMoveList.map((m) => m.position));
-    console.log(possibleMoveList);
+    const prevSquares = Array(64).fill([]);
+    possibleMoveList.forEach(
+      (m) =>
+        (prevSquares[m.position] = [
+          ...new Set([...prevSquares[m.position], m.endNumber]),
+        ])
+    );
+    setPreviewSquares(prevSquares);
   };
 
-  const engine = async () => {
-    // Compute the best move
-    const bestMoves = await new Promise<Move[]>((resolve) => {
-      setTimeout(() => {
-        resolve(engineCalculation(board));
-      }, 500);
-    });
-    const move = bestMoves[0];
-
-    // Animate the Move
+  const animateEngineMove = (move: Move) => {
     const diceDiv = diceRefs.current[move.dice.position].current;
     if (!diceDiv) return;
     const handleMoveAnimationEnd = () => {
@@ -133,8 +136,20 @@ const Board = () => {
   };
 
   console.log("Rendered. WhiteToMove = " + isWhitesMove);
-  if (!isWhitesMove) {
-    engine();
+  const engineData = useMemo(
+    () =>
+      isWhitesMove
+        ? undefined
+        : {
+            board: board,
+            isWhitesMove: isWhitesMove,
+          },
+    [board]
+  );
+  const { result } = useWorker(createWorker, engineData);
+  if (result) {
+    const bestMoves = (result as WorkerResult).result;
+    if (bestMoves.length > 0) animateEngineMove(bestMoves[0]);
   }
 
   return (
@@ -147,7 +162,8 @@ const Board = () => {
             index={i}
             isWhite={i % 2 === ~~(i / 8) % 2}
             dice={square}
-            highlight={highlightedSquares.includes(i)}
+            movePreview={previewSquares[i]}
+            isWhitePreview={true}
             moveFn={moveDice}
             highlightFn={highlightMoves}
             diceRef={diceRefs.current[i]}

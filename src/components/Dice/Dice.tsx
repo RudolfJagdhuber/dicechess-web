@@ -1,18 +1,6 @@
 import { RefObject } from "react";
 import "./Dice.css";
-
-export interface DiceProps {
-  number: number;
-  // orientation: {
-  //   top: number;
-  //   right: number;
-  //   bottom: number;
-  //   left: number;
-  //   opposing: number;
-  // };
-  position: number;
-  isWhite: boolean;
-}
+import { DiceProps } from "./helpers";
 
 const Dice = ({
   dice,
@@ -40,7 +28,7 @@ const Dice = ({
     const y = event.clientY - rect.top - rect.height / 2;
     activeElement.style.transition = "none";
     activeElement.style.transform = `translate(${x}px, ${y}px)`;
-    activeElement.style.zIndex = "2";
+    activeElement.style.zIndex = "3";
   };
 
   const moveDice = (event: MouseEvent): void => {
@@ -58,16 +46,18 @@ const Dice = ({
     if (!activeElement) return;
     // Compute number of quares traversed in x and y direction.
     const squareWidth = rect.width / 0.7;
-    const dx = Math.floor(
-      (event.clientX - rect.left + (squareWidth - rect.width) / 2) / squareWidth
-    );
+    const dxFull =
+      (event.clientX - rect.left + (squareWidth - rect.width) / 2) /
+      squareWidth;
+    const dx = Math.floor(dxFull);
     const dy = Math.floor(
       (event.clientY - rect.top + (squareWidth - rect.width) / 2) / squareWidth
     );
-    // New position needs to be on the board: [0, 63]
+    const isRightHalf = dxFull % 1 > Math.sign(dxFull) * 0.5;
     const newPos = dice.position + (8 * dy + dx);
-    // Actual column needs to be on the board: [0, 7]
     const newCol = (dice.position % 8) + dx;
+    // New position and actual column need to be on the board.
+    // => newPos in [0, 63], newCol in [0, 7]
     if (
       newPos >= 0 &&
       newPos < 64 &&
@@ -75,8 +65,10 @@ const Dice = ({
       newCol < 8 &&
       newPos !== dice.position
     ) {
-      // Function checks if its a legal move. Returns false if not.
-      if (moveFn(dice, newPos)) {
+      // Function checks if its a legal move. Returns false if not. If dice is
+      // dropped on the second half of the square, the value is returned
+      // negative to indicate that the second move option was chosen.
+      if (moveFn(dice, newPos * (isRightHalf ? -1 : 1))) {
         activeElement = undefined;
         return;
       }
