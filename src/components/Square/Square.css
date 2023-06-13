@@ -8,19 +8,11 @@
 }
 
 .white {
-    background-color: #ebecd0;
+    background-color: #eeeed2;
 }
 
 .black {
-    background-color: #779556;
-}
-
-.highlight {
-    position: absolute;
-    border-radius: 50%;
-    width: 30%;
-    height: 30%;
-    background-color: #00000024;
+    background-color: #769656;
 }
 
 .preview-container {
