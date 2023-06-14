@@ -1,0 +1,134 @@
+.modal-background {
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.65);
+  z-index: 4;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-container {
+  position: relative;
+  width: 400px;
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-title {
+  height: 100px;
+  display: inline-block;
+  text-align: center;
+  color: #fff;
+  background-color: #999;
+  clip-path: ellipse(65% 77% at 50% 22%);
+  border-top-right-radius: 16px;
+  border-top-left-radius: 16px;
+}
+.modal-title .win {
+  background-color: #7fa650;
+
+}
+
+.modal-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+}
+
+.modal-close button {
+  border: none;
+  background-color: transparent;
+  color: #fff;
+  font-size: 40px;
+  height: 48px;
+  width: 48px;
+  cursor: pointer;
+}
+
+.modal-close button:hover {
+  color: #ffffffbb;
+}
+
+.modal-result {
+  margin-top: 24px;
+}
+
+.modal-result-avatars {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+}
+
+.modal-avatar {
+  height: 80px;
+  width: 80px;
+  border-radius: 8px;
+  background-size: cover;
+  box-shadow: rgba(0, 0, 0, 0.35) 1px 2px 2px;
+}
+
+.modal-result-text {
+  width: 48px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.modal-result-names {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 4px;
+  gap: 96px;
+}
+
+ .modal-player-name {
+  width: 80px; 
+  font-size: 16px;
+  text-align: center;
+  text-overflow: ellipsis;
+ }
+
+.modal-highscore {
+  height: 56px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  margin: 16px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 24px;
+  margin-top: 16px;
+}
+
+.modal-footer button {
+  width: 120px;
+  height: 40px;
+  border: none;
+  background-color: #7fa650;
+  color: white;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.modal-footer button:hover {
+  background-color: #7fa650bb;
+}

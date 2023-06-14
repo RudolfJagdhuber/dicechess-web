@@ -1,6 +1,6 @@
 <svg version="1.1" width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
 
-    <rect x="1" y="1" width="62" height="62" fill="#222" rx="4" stroke="#777" stroke-width="2" />
+    <rect width="64" height="64" fill="#222" />
 
     <g fill="#f1f1f1">
         <path transform="translate(7,7) scale(.72, .72)"

@@ -1,5 +1,11 @@
 import "./Player.css";
 
+export interface PlayerProps {
+  name: string;
+  avatarAsset: string;
+  isEngine: boolean;
+}
+
 const LoadingSpinner = () => {
   return (
     <div className="spinner-container">
@@ -9,21 +15,24 @@ const LoadingSpinner = () => {
 };
 
 const Player = ({
-  isPlayer = false,
+  player,
   isToMove = false,
 }: {
-  isPlayer: boolean;
+  player: PlayerProps;
   isToMove: boolean;
 }) => {
-  const avatar = "assets/images/" + (isPlayer ? "user" : "engine") + ".svg";
+  // const avatar = "assets/images/" + (isPlayer ? "user" : "engine") + ".svg";
 
   return (
     <div className="player-layout">
-      <div className="avatar" style={{ backgroundImage: `url(${avatar})` }} />
-      <div className="name">{isPlayer ? "Player" : "Computer"}</div>
+      <div
+        className="avatar"
+        style={{ backgroundImage: `url(${player.avatarAsset})` }}
+      />
+      <div className="name">{player.name}</div>
       <div className={`clock ${isToMove ? "active" : "inactive"}`}>
-        {!isPlayer && isToMove && <LoadingSpinner />}
-        {!isToMove ? "" : isPlayer ? "Your move" : "Thinking..."}
+        {player.isEngine && isToMove && <LoadingSpinner />}
+        {!isToMove ? "" : player.isEngine ? "Thinking..." : "Your Turn"}
       </div>
     </div>
   );

@@ -11,7 +11,8 @@ import "./Board.css";
 import Square from "../Square/Square";
 import { DiceProps, makeDice } from "../Dice/helpers";
 import { possibleMoves, DiceMove, Move } from "../Dice/helpers";
-import Player from "../Player/Player";
+import Player, { PlayerProps } from "../Player/Player";
+import GameEndModal from "../../GameEndModal/GameEndModal";
 
 interface WorkerResult {
   result: Move | undefined;
@@ -37,14 +38,22 @@ boardX[61] = makeDice(1, 4, 61, true);
 boardX[62] = makeDice(3, 1, 62, true);
 boardX[63] = makeDice(2, 1, 63, true);
 
+// Array(2): [whitePlayer, blackPlayer]
+const players: PlayerProps[] = [
+  { name: "Player", avatarAsset: "assets/images/user.svg", isEngine: false },
+  { name: "Computer", avatarAsset: "assets/images/engine.svg", isEngine: true },
+];
+
 let isWhitesMove = true;
 let possibleMoveList: DiceMove[] = [];
+let gameResult: number | undefined = undefined;
 
 const Board = () => {
   const [board, setBoard] = useState<Array<DiceProps | undefined>>(boardX);
   const [previewSquares, setPreviewSquares] = useState<number[][]>(
     Array(64).fill([])
   );
+  const [gameEndVisible, setGameEndVisible] = useState(false);
   const diceRefs = useRef<RefObject<HTMLDivElement>[]>([]);
 
   useEffect(() => {
@@ -54,7 +63,20 @@ const Board = () => {
       .map(() => createRef<HTMLDivElement>());
   }, []);
 
+  const newGame = () => {
+    isWhitesMove = true;
+    possibleMoveList = [];
+    gameResult = undefined;
+    setBoard(boardX);
+  };
+
   const updateBoard = (move: Move) => {
+    // Check Game End
+    const beatDice = board[move.move.position];
+    if (beatDice && beatDice.number === 0) {
+      gameResult = beatDice.isWhite ? -1 : 1;
+      setTimeout(() => setGameEndVisible(true), 500);
+    }
     setBoard((d) => {
       const newDice: DiceProps = {
         number: move.move.endNumber,
@@ -79,8 +101,8 @@ const Board = () => {
     const movesTo = possibleMoveList.filter((m) => m.position === Math.abs(to));
     const move = movesTo[movesTo.length === 1 || to > 0 ? 0 : 1];
     if (!move) return false;
-    // Check if its the players turn
-    if (isWhitesMove !== dice.isWhite) return false;
+    // Check if its the players turn, or game ended already
+    if (isWhitesMove !== dice.isWhite || gameResult) return false;
     // Make the move
     updateBoard({ dice: dice, move: move });
     possibleMoveList = [];
@@ -141,7 +163,7 @@ const Board = () => {
   console.log("Rendered. WhiteToMove = " + isWhitesMove);
   const engineData = useMemo(
     () =>
-      isWhitesMove
+      isWhitesMove || gameResult
         ? undefined
         : {
             board: board,
@@ -157,7 +179,7 @@ const Board = () => {
 
   return (
     <div id="board-layout">
-      <Player isPlayer={false} isToMove={!isWhitesMove} />
+      <Player player={players[1]} isToMove={!gameResult && !isWhitesMove} />
       <div id="board">
         {board.map((square, i) => (
           <Square
@@ -172,7 +194,15 @@ const Board = () => {
           />
         ))}
       </div>
-      <Player isPlayer={true} isToMove={isWhitesMove} />
+      <Player player={players[0]} isToMove={!gameResult && isWhitesMove} />
+      {gameEndVisible && (
+        <GameEndModal
+          players={players}
+          result={gameResult}
+          setVisible={setGameEndVisible}
+          newGame={newGame}
+        />
+      )}
     </div>
   );
 };
