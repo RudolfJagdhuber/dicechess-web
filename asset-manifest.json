@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/dicechess-web/static/css/main.03fc5889.css",
-    "main.js": "/dicechess-web/static/js/main.0d8d63ee.js",
+    "main.css": "/dicechess-web/static/css/main.1479d9ba.css",
+    "main.js": "/dicechess-web/static/js/main.0bd25941.js",
     "static/js/592.6602c3fc.chunk.js": "/dicechess-web/static/js/592.6602c3fc.chunk.js",
     "index.html": "/dicechess-web/index.html",
-    "main.03fc5889.css.map": "/dicechess-web/static/css/main.03fc5889.css.map",
-    "main.0d8d63ee.js.map": "/dicechess-web/static/js/main.0d8d63ee.js.map",
+    "main.1479d9ba.css.map": "/dicechess-web/static/css/main.1479d9ba.css.map",
+    "main.0bd25941.js.map": "/dicechess-web/static/js/main.0bd25941.js.map",
     "592.6602c3fc.chunk.js.map": "/dicechess-web/static/js/592.6602c3fc.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.03fc5889.css",
-    "static/js/main.0d8d63ee.js"
+    "static/css/main.1479d9ba.css",
+    "static/js/main.0bd25941.js"
   ]
 }
