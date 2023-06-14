@@ -2,10 +2,10 @@
     display: grid;
     grid-template-columns: repeat(8, 12.5%);
     grid-template-rows: repeat(8, 12.5%);
-    width: calc(100vw - 80px);
-    height: calc(100vw - 80px);
-    max-width: calc(100vh - 104px - 80px);
-    max-height: calc(100vh - 104px - 80px);
+    width: calc(100vw - 40px);
+    height: calc(100vw - 40px);
+    max-width: calc(100vh - 104px - 40px);
+    max-height: calc(100vh - 104px - 40px);
 }
 
 .game {

@@ -17,6 +17,7 @@ const Dice = ({
   let rect: DOMRect;
 
   const grabDiceTouch = (event: React.TouchEvent) => {
+    event.preventDefault();
     activeElement = event.currentTarget as HTMLElement;
     grabDice(event.touches[0].clientX, event.touches[0].clientY);
   };
@@ -43,6 +44,7 @@ const Dice = ({
   };
 
   const moveDiceTouch = (event: TouchEvent): void => {
+    event.preventDefault();
     moveDice(event.touches[0].clientX, event.touches[0].clientY);
   };
 
@@ -59,6 +61,7 @@ const Dice = ({
   };
 
   const placeDiceTouch = (event: TouchEvent): void => {
+    event.preventDefault();
     placeDice(event.touches[0].clientX, event.touches[0].clientY);
   };
 
