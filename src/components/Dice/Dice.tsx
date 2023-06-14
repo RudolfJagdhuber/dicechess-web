@@ -16,41 +16,70 @@ const Dice = ({
   let activeElement: HTMLElement | undefined;
   let rect: DOMRect;
 
-  const grabDice = (event: React.MouseEvent) => {
-    document.addEventListener("mouseup", placeDice);
-    document.addEventListener("mousemove", moveDice);
-    highlightFn(dice);
+  const grabDiceTouch = (event: React.TouchEvent) => {
     activeElement = event.currentTarget as HTMLElement;
+    grabDice(event.touches[0].clientX, event.touches[0].clientY);
+  };
+
+  const grabDiceCursor = (event: React.MouseEvent) => {
+    activeElement = event.currentTarget as HTMLElement;
+    grabDice(event.clientX, event.clientY);
+  };
+
+  const grabDice = (clientX: number, clientY: number) => {
+    if (!activeElement) return;
+    document.addEventListener("mouseup", placeDiceCursor);
+    document.addEventListener("mousemove", moveDiceCursor);
+    document.addEventListener("touchend", placeDiceTouch);
+    document.addEventListener("touchmove", moveDiceTouch);
+    highlightFn(dice);
     rect = activeElement.getBoundingClientRect();
-    const x = event.clientX - rect.left - rect.width / 2;
-    const y = event.clientY - rect.top - rect.height / 2;
+    const x = clientX - rect.left - rect.width / 2;
+    const y = clientY - rect.top - rect.height / 2;
     activeElement.style.transition = "none";
     activeElement.style.pointerEvents = "none";
     activeElement.style.transform = `translate(${x}px, ${y}px)`;
     activeElement.style.zIndex = "3";
   };
 
-  const moveDice = (event: MouseEvent): void => {
+  const moveDiceTouch = (event: TouchEvent): void => {
+    moveDice(event.touches[0].clientX, event.touches[0].clientY);
+  };
+
+  const moveDiceCursor = (event: MouseEvent): void => {
+    moveDice(event.clientX, event.clientY);
+  };
+
+  const moveDice = (clientX: number, clientY: number): void => {
     if (activeElement) {
-      const x = event.clientX - rect.left - rect.width / 2;
-      const y = event.clientY - rect.top - rect.height / 2;
+      const x = clientX - rect.left - rect.width / 2;
+      const y = clientY - rect.top - rect.height / 2;
       activeElement.style.transform = `translate(${x}px, ${y}px)`;
     }
   };
 
-  const placeDice = (event: MouseEvent): void => {
-    document.removeEventListener("mouseup", placeDice);
-    document.removeEventListener("mousemove", moveDice);
+  const placeDiceTouch = (event: TouchEvent): void => {
+    placeDice(event.touches[0].clientX, event.touches[0].clientY);
+  };
+
+  const placeDiceCursor = (event: MouseEvent): void => {
+    placeDice(event.clientX, event.clientY);
+  };
+
+  const placeDice = (clientX: number, clientY: number): void => {
+    document.removeEventListener("mouseup", placeDiceCursor);
+    document.removeEventListener("mousemove", moveDiceCursor);
+    document.removeEventListener("touchend", placeDiceTouch);
+    document.removeEventListener("touchmove", moveDiceTouch);
     highlightFn(undefined);
     if (!activeElement) return;
     // Compute number of quares traversed in x and y direction.
     const squareWidth = rect.width / 0.7;
     const dxFull =
-      (event.clientX - rect.left + (squareWidth - rect.width) / 2) /
-      squareWidth;
+      (clientX - rect.left + (squareWidth - rect.width) / 2) / squareWidth;
     const dx = Math.floor(dxFull);
     const dy = Math.floor(
-      (event.clientY - rect.top + (squareWidth - rect.width) / 2) / squareWidth
+      (clientY - rect.top + (squareWidth - rect.width) / 2) / squareWidth
     );
     const isRightHalf = dxFull % 1 > Math.sign(dxFull) * 0.5;
     const newPos = dice.position + (8 * dy + dx);
@@ -91,9 +120,8 @@ const Dice = ({
       ref={diceRef}
       style={{ backgroundImage: `url(${asset})` }}
       className="dice"
-      onMouseDown={grabDice}
-      // onMouseMove={moveDice}
-      // onMouseUp={placeDice}
+      onMouseDown={grabDiceCursor}
+      onTouchStart={grabDiceTouch}
     />
   );
 };

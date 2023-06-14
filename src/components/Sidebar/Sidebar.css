@@ -1,0 +1,46 @@
+
+.sidebar-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 40px);
+    width: 24%;
+    min-width: 360px;
+    border-radius: 8px;
+    background-color: #262421;
+}
+
+.sidebar-footer {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 24px;
+  margin-top: 16px;
+}
+
+.sidebar-action-button {
+  width: 160px;
+  height: 40px;
+  border: none;
+  color: white;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sidebar-action-button.newgame {
+  background-color: #7fa650;
+}
+
+.sidebar-action-button.newgame:hover {
+  background-color: #7fa650bb;
+}
+
+.sidebar-action-button.resign {
+  background-color: #cf4846;
+}
+
+.sidebar-action-button.resign:hover {
+  background-color: #cf4846bb;
+}

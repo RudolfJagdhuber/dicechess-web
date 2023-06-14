@@ -12,7 +12,8 @@ import Square from "../Square/Square";
 import { DiceProps, makeDice } from "../Dice/helpers";
 import { possibleMoves, DiceMove, Move } from "../Dice/helpers";
 import Player, { PlayerProps } from "../Player/Player";
-import GameEndModal from "../../GameEndModal/GameEndModal";
+import GameEndModal from "../GameEndModal/GameEndModal";
+import Sidebar from "../Sidebar/Sidebar";
 
 interface WorkerResult {
   result: Move | undefined;
@@ -46,7 +47,6 @@ const players: PlayerProps[] = [
 
 let isWhitesMove = true;
 let possibleMoveList: DiceMove[] = [];
-let gameResult: number | undefined = undefined;
 
 const Board = () => {
   const [board, setBoard] = useState<Array<DiceProps | undefined>>(boardX);
@@ -54,6 +54,7 @@ const Board = () => {
     Array(64).fill([])
   );
   const [gameEndVisible, setGameEndVisible] = useState(false);
+  const [gameResult, setGameResult] = useState<number | undefined>(undefined);
   const diceRefs = useRef<RefObject<HTMLDivElement>[]>([]);
 
   useEffect(() => {
@@ -66,15 +67,20 @@ const Board = () => {
   const newGame = () => {
     isWhitesMove = true;
     possibleMoveList = [];
-    gameResult = undefined;
     setBoard(boardX);
+    setGameResult(undefined);
+  };
+
+  const resign = () => {
+    setGameResult(-1);
+    setTimeout(() => setGameEndVisible(true), 500);
   };
 
   const updateBoard = (move: Move) => {
     // Check Game End
     const beatDice = board[move.move.position];
     if (beatDice && beatDice.number === 0) {
-      gameResult = beatDice.isWhite ? -1 : 1;
+      setGameResult(beatDice.isWhite ? -1 : 1);
       setTimeout(() => setGameEndVisible(true), 500);
     }
     setBoard((d) => {
@@ -169,7 +175,7 @@ const Board = () => {
             board: board,
             isWhitesMove: isWhitesMove,
           },
-    [board]
+    [board, gameResult]
   );
   const { result } = useWorker(createWorker, engineData);
   if (result) {
@@ -178,31 +184,34 @@ const Board = () => {
   }
 
   return (
-    <div id="board-layout">
-      <Player player={players[1]} isToMove={!gameResult && !isWhitesMove} />
-      <div id="board">
-        {board.map((square, i) => (
-          <Square
-            key={i}
-            index={i}
-            isWhite={i % 2 === ~~(i / 8) % 2}
-            dice={square}
-            movePreview={previewSquares[i]}
-            moveFn={moveDice}
-            highlightFn={highlightMoves}
-            diceRef={diceRefs.current[i]}
+    <div className="game">
+      <div id="board-layout">
+        <Player player={players[1]} isToMove={!gameResult && !isWhitesMove} />
+        <div id="board">
+          {board.map((square, i) => (
+            <Square
+              key={i}
+              index={i}
+              isWhite={i % 2 === ~~(i / 8) % 2}
+              dice={square}
+              movePreview={previewSquares[i]}
+              moveFn={moveDice}
+              highlightFn={highlightMoves}
+              diceRef={diceRefs.current[i]}
+            />
+          ))}
+        </div>
+        <Player player={players[0]} isToMove={!gameResult && isWhitesMove} />
+        {gameEndVisible && (
+          <GameEndModal
+            players={players}
+            result={gameResult}
+            setVisible={setGameEndVisible}
+            newGame={newGame}
           />
-        ))}
+        )}
       </div>
-      <Player player={players[0]} isToMove={!gameResult && isWhitesMove} />
-      {gameEndVisible && (
-        <GameEndModal
-          players={players}
-          result={gameResult}
-          setVisible={setGameEndVisible}
-          newGame={newGame}
-        />
-      )}
+      <Sidebar gameResult={gameResult} newGameFn={newGame} resignFn={resign} />
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { PlayerProps } from "../components/Player/Player";
+import { PlayerProps } from "../Player/Player";
 import "./GameEndModal.css";
 
 const GameEndModal = ({
@@ -60,7 +60,7 @@ const GameEndModal = ({
           </div>
         </div>
         <div className="modal-highscore">
-          <p>Game Over</p>
+          <p>(No Rating available)</p>
         </div>
         <div className="modal-footer">
           <button onClick={playAgain}>Play Again</button>
