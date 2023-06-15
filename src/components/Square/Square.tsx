@@ -1,5 +1,5 @@
 import { RefObject } from "react";
-import Dice from "../Dice/Dice";
+import Dice, { DiceRef } from "../Dice/Dice";
 import { DiceProps } from "../Dice/helpers";
 import "./Square.css";
 
@@ -18,7 +18,7 @@ const Square = ({
   movePreview: number[];
   moveFn: (dice: DiceProps, to: number) => boolean;
   highlightFn: (dice: DiceProps | undefined) => void;
-  diceRef: RefObject<HTMLDivElement>;
+  diceRef: RefObject<DiceRef>; //RefObject<HTMLDivElement>;
 }) => {
   return (
     <div
@@ -32,7 +32,7 @@ const Square = ({
           dice={dice}
           moveFn={moveFn}
           highlightFn={highlightFn}
-          diceRef={diceRef}
+          ref={diceRef}
         />
       )}
       {movePreview.length > 0 && (

@@ -22,7 +22,7 @@ const worker = (data: WorkerData | undefined): WorkerResult => {
     data.currentDepth,
     data.maxDepth
   );
-  console.log("Proposed a move!");
+  // console.log("Proposed a move!");
   return { result: bestMove as Move };
 };
 

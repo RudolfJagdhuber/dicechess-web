@@ -14,6 +14,7 @@ import { possibleMoves, DiceMove, Move } from "../Dice/helpers";
 import Player, { PlayerProps } from "../Player/Player";
 import GameEndModal from "../GameEndModal/GameEndModal";
 import Sidebar from "../Sidebar/Sidebar";
+import { DiceRef } from "../Dice/Dice";
 
 interface WorkerResult {
   result: Move | undefined;
@@ -55,13 +56,13 @@ const Board = () => {
   );
   const [gameEndVisible, setGameEndVisible] = useState(false);
   const [gameResult, setGameResult] = useState<number | undefined>(undefined);
-  const diceRefs = useRef<RefObject<HTMLDivElement>[]>([]);
+  const diceRefs = useRef<RefObject<DiceRef>[]>([]);
 
   useEffect(() => {
     // initialize the array of refs
     diceRefs.current = Array(64)
       .fill(null)
-      .map(() => createRef<HTMLDivElement>());
+      .map(() => createRef<DiceRef>());
   }, []);
 
   const newGame = () => {
@@ -79,11 +80,15 @@ const Board = () => {
   const updateBoard = (move: Move) => {
     // Check Game End
     const beatDice = board[move.move.position];
-    if (beatDice && beatDice.number === 0) {
-      setGameResult(beatDice.isWhite ? -1 : 1);
-      setTimeout(() => setGameEndVisible(true), 500);
+    if (beatDice) {
+      diceRefs.current[beatDice.position] = createRef<DiceRef>();
+      if (beatDice.number === 0) {
+        setGameResult(beatDice.isWhite ? -1 : 1);
+        setTimeout(() => setGameEndVisible(true), 500);
+      }
     }
     setBoard((d) => {
+      // console.log("Update Board");
       const newDice: DiceProps = {
         number: move.move.endNumber,
         orientation: move.move.endOrientation,
@@ -119,6 +124,13 @@ const Board = () => {
   // set preview squares to display from moves of a dice. reset if undefined.
   // To indicate the dice is black we add 0.1 to the preview.
   const highlightMoves = (dice: DiceProps | undefined) => {
+    // TODO: HEILAND ZACK DER SIEHT HIER IMMER DIE STARTPOSITION WENN ICH NEN
+    // BREAKPOINT HIER SETZE IM MOBILE MODE IN CHROME.
+    // JEDER WÜRFEL MACHT BLÖDSINN BIS ER EINMAL GEZOGEN WURDE. DANN KENTT ER
+    // DIE STELLUNG, ABER NUR DIE AKTUELLE NACH SEINEM ZUG. ZIEHT NUN EIN
+    // ANDERER WÜRFEL 3x, UND DANN WIEDER DER EINE, SO DENKT ER AN DIE STELLUNG
+    // VOR 3 ZÜGEN. WAS EIN BULLSHIT. UND NUR IM MOBILE MODE!!!!
+    console.log("BLÖDSINN: " + (board === boardX));
     if (!dice) {
       // Avoid rerender while opponent thinks
       setPreviewSquares(Array(64).fill([]));
@@ -136,19 +148,20 @@ const Board = () => {
         ])
     );
     // Also highlight original dice position. Indicate by negative number
-    prevSquares[dice.position] = [-dice.number];
+    prevSquares[dice.position] = [-(dice.number + (dice.isWhite ? 0 : 0.1))];
     setPreviewSquares(prevSquares);
   };
 
   const animateEngineMove = (move: Move) => {
-    const diceDiv = diceRefs.current[move.dice.position].current;
+    const diceDiv =
+      diceRefs.current[move.dice.position].current?.getRef().current;
     if (!diceDiv) return;
     const handleMoveAnimationEnd = () => {
       diceDiv.removeEventListener("transitionend", handleMoveAnimationEnd);
       // Perform the move
       updateBoard(move);
       isWhitesMove = !isWhitesMove;
-      console.log("Transition completed");
+      // console.log("Transition completed");
     };
     const translateString = translatePxFromMove(
       move,
