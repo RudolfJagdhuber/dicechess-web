@@ -16,6 +16,7 @@ const Dice = ({
   let activeElement: HTMLElement | undefined;
   let rect: DOMRect;
   let dicePx: { x: number; y: number } = { x: 0, y: 0 };
+  let highlightElement: Element | undefined;
 
   const noScroll = (event: TouchEvent) => {
     event.preventDefault();
@@ -37,7 +38,7 @@ const Dice = ({
 
   const grabDice = () => {
     if (!activeElement) return;
-    document.addEventListener("mouseup", placeDiceCursor);
+    document.addEventListener("mouseup", placeDice);
     document.addEventListener("mousemove", moveDiceCursor);
     document.addEventListener("touchend", placeDiceTouch, { passive: false });
     document.addEventListener("touchmove", moveDiceTouch, { passive: false });
@@ -46,7 +47,7 @@ const Dice = ({
     const x = dicePx.x - rect.left - rect.width / 2;
     const y = dicePx.y - rect.top - rect.height / 2;
     activeElement.style.transition = "none";
-    activeElement.style.pointerEvents = "none";
+    // activeElement.style.pointerEvents = "none";
     activeElement.style.transform = `translate(${x}px, ${y}px)`;
     activeElement.style.zIndex = "3";
   };
@@ -64,6 +65,25 @@ const Dice = ({
 
   const moveDice = (): void => {
     if (activeElement) {
+      // Find a square to highlight
+      const element = document
+        .elementsFromPoint(dicePx.x, dicePx.y)
+        .filter((e) => e.className.startsWith("preview-inner-container"));
+      if (element.length === 0) {
+        if (highlightElement) {
+          highlightElement?.classList.remove("highlight");
+          highlightElement = undefined;
+          console.log("Removed Highlight");
+        }
+      } else {
+        if (element[0].className === "preview-inner-container") {
+          highlightElement?.classList.remove("highlight");
+          highlightElement = element[0];
+          highlightElement.classList.add("highlight");
+          console.log("New Highlight");
+        }
+      }
+
       const x = dicePx.x - rect.left - rect.width / 2;
       const y = dicePx.y - rect.top - rect.height / 2;
       activeElement.style.transform = `translate(${x}px, ${y}px)`;
@@ -76,13 +96,8 @@ const Dice = ({
     placeDice();
   };
 
-  const placeDiceCursor = (event: MouseEvent): void => {
-    document.body.style.overflow = "auto";
-    placeDice();
-  };
-
   const placeDice = (): void => {
-    document.removeEventListener("mouseup", placeDiceCursor);
+    document.removeEventListener("mouseup", placeDice);
     document.removeEventListener("mousemove", moveDiceCursor);
     document.removeEventListener("touchend", placeDiceTouch);
     document.removeEventListener("touchmove", moveDiceTouch);
@@ -118,7 +133,7 @@ const Dice = ({
         return;
       }
     }
-    activeElement.style.pointerEvents = "auto";
+    // activeElement.style.pointerEvents = "auto";
     activeElement.style.transition = "transform 0.2s";
     activeElement.style.transform = "translate(0px, 0px)";
     activeElement.style.zIndex = "1";

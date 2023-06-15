@@ -135,6 +135,8 @@ const Board = () => {
           ]),
         ])
     );
+    // Also highlight original dice position. Indicate by negative number
+    prevSquares[dice.position] = [-dice.number];
     setPreviewSquares(prevSquares);
   };
 

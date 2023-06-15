@@ -20,7 +20,7 @@
     display: flex;
     justify-content: space-evenly;
     align-items: center;
-    opacity: 85%;
+    opacity: 80%;
     height: 100%;
     width: 100%;
     z-index: 2;
@@ -38,11 +38,7 @@
     border: 2px solid transparent;
 }
 
-.preview-inner-container:hover {
-    background-color: #ffff00bb;
-    border: 2px solid #262421;
-}
-.preview-inner-container.touch {
+.preview-inner-container.highlight {
     background-color: #ffff00bb;
     border: 2px solid #262421;
 }
@@ -52,6 +48,16 @@
     height: 40%;
     aspect-ratio: 1;
     background-size: cover;
+    background-color: #ffff00bb;
+    border-radius: 16%;
+    border: 3px solid #ffff00;
+}
+
+.dice-preview-start {
+    height: 70%;
+    aspect-ratio: 1;
+    background-size: cover;
+    opacity: 40%;
 }
 
 .sep {
