@@ -31,7 +31,7 @@
   border-top-right-radius: 16px;
   border-top-left-radius: 16px;
 }
-.modal-title .win {
+.modal-title.win {
   background-color: #7fa650;
 
 }
@@ -93,7 +93,7 @@
   gap: 96px;
 }
 
- .modal-player-name {
+.modal-player-name {
   width: 80px; 
   font-size: 16px;
   text-align: center;
