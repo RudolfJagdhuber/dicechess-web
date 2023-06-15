@@ -1,4 +1,4 @@
-import { RefObject } from "react";
+import { RefObject, useEffect } from "react";
 import "./Dice.css";
 import { DiceProps } from "./helpers";
 
@@ -18,17 +18,21 @@ const Dice = ({
   let dicePx: { x: number; y: number } = { x: 0, y: 0 };
   let highlightElement: Element | undefined;
 
-  const noScroll = (event: TouchEvent) => {
+  const grabDiceTouch = (event: TouchEvent) => {
     event.preventDefault();
-  };
-
-  const grabDiceTouch = (event: React.TouchEvent) => {
-    event.preventDefault();
-    document.addEventListener("touchstart", noScroll, { passive: false });
     activeElement = event.currentTarget as HTMLElement;
     dicePx = { x: event.touches[0].clientX, y: event.touches[0].clientY };
     grabDice();
   };
+
+  useEffect(() => {
+    if (diceRef && diceRef.current) {
+      console.log("Set Listener");
+      diceRef.current.addEventListener("touchstart", grabDiceTouch, {
+        passive: false,
+      });
+    }
+  }, [diceRef]);
 
   const grabDiceCursor = (event: React.MouseEvent) => {
     activeElement = event.currentTarget as HTMLElement;
@@ -92,7 +96,6 @@ const Dice = ({
 
   const placeDiceTouch = (event: TouchEvent): void => {
     event.preventDefault();
-    document.removeEventListener("touchstart", noScroll);
     placeDice();
   };
 
@@ -133,7 +136,6 @@ const Dice = ({
         return;
       }
     }
-    // activeElement.style.pointerEvents = "auto";
     activeElement.style.transition = "transform 0.2s";
     activeElement.style.transform = "translate(0px, 0px)";
     activeElement.style.zIndex = "1";
@@ -145,13 +147,13 @@ const Dice = ({
     (dice.isWhite ? "w" : "b") +
     (dice.number === 0 ? "k" : dice.number === -1 ? 0 : dice.number) +
     ".svg";
+
   return (
     <div
       ref={diceRef}
       style={{ backgroundImage: `url(${asset})` }}
       className="dice"
       onMouseDown={grabDiceCursor}
-      onTouchStart={grabDiceTouch}
     />
   );
 };
