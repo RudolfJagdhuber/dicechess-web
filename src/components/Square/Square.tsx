@@ -52,6 +52,8 @@ const MovePreview = ({
   movePreview: number[];
   isWhitePreview: boolean;
 }) => {
+  let activeElement: HTMLElement | undefined;
+
   const diceAssets = movePreview.map((num) => {
     const rounded = Math.round(num);
     return (
@@ -62,9 +64,21 @@ const MovePreview = ({
     );
   });
 
+  // Only relevant for mobile devices. Mouse is covered by css :hover
+  const highlight = (event: React.TouchEvent, active = true) => {
+    if (active) {
+      activeElement = event.currentTarget as HTMLElement;
+      activeElement.classList.add("touch");
+    } else activeElement?.classList.remove("touch");
+  };
+
   return (
     <div className="preview-container">
-      <div className="preview-inner-container">
+      <div
+        className="preview-inner-container"
+        onTouchStart={(e) => highlight(e)}
+        onTouchEnd={(e) => highlight(e, false)}
+      >
         <div
           style={{ backgroundImage: `url(${diceAssets[0]})` }}
           className="dice-preview"
@@ -72,7 +86,11 @@ const MovePreview = ({
       </div>
       {diceAssets.length === 2 && <div className="sep" />}
       {diceAssets.length === 2 && (
-        <div className="preview-inner-container">
+        <div
+          className="preview-inner-container"
+          onTouchStart={(e) => highlight(e)}
+          onTouchEnd={(e) => highlight(e, false)}
+        >
           <div
             style={{ backgroundImage: `url(${diceAssets[1]})` }}
             className="dice-preview"

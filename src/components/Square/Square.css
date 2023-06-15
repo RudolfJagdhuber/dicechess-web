@@ -27,20 +27,29 @@
 }
 
 .preview-inner-container {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
     display: flex;
     flex: 1;
-    padding: 2%;
-    height: 96%;
+    height: 100%;
     justify-content: center;
     align-items: center;
+    border: 2px solid transparent;
 }
 
 .preview-inner-container:hover {
     background-color: #ffff00bb;
+    border: 2px solid #262421;
+}
+.preview-inner-container.touch {
+    background-color: #ffff00bb;
+    border: 2px solid #262421;
 }
 
+
 .dice-preview {
-    height: 45%;
+    height: 40%;
     aspect-ratio: 1;
     background-size: cover;
 }
